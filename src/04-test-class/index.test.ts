@@ -94,7 +94,6 @@ describe('BankAccount', () => {
       await bankAccount.synchronizeBalance();
       expect(true).toBe(true);
     } catch (error) {
-      console.log(error);
       expect(error).toBeInstanceOf(SynchronizationFailedError);
     }
   });
