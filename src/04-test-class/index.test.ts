@@ -2,6 +2,7 @@ import {
   BankAccount,
   getBankAccount,
   InsufficientFundsError,
+  SynchronizationFailedError,
   TransferFailedError,
 } from './index';
 
@@ -88,6 +89,13 @@ describe('BankAccount', () => {
   });
 
   test('should throw SynchronizationFailedError if fetchBalance returned null', async () => {
-    // Write your tests here
+    const bankAccount = getBankAccount(random(5000, 10000));
+    try {
+      await bankAccount.synchronizeBalance();
+      expect(true).toBe(true);
+    } catch (error) {
+      console.log(error);
+      expect(error).toBeInstanceOf(SynchronizationFailedError);
+    }
   });
 });
