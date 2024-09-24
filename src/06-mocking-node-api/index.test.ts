@@ -1,5 +1,27 @@
 import { doStuffByInterval, doStuffByTimeout, readFileAsynchronously } from '.';
+import * as fs from 'fs';
 import path from 'path';
+
+const generateRandomString = (length = 10) => {
+  let resultString = '';
+  const characters =
+    '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for (let i = 1; i <= length; i++) {
+    resultString += characters.charAt(
+      Math.floor(Math.random() * characters.length),
+    );
+  }
+  return resultString;
+};
+
+const generateRandomPath = (length = 5) => {
+  let path = '';
+  for (let i = 1; i <= length; i++) {
+    path += `/${generateRandomString(5)}`;
+  }
+
+  return `${path}.${generateRandomString()}`;
+};
 
 describe('doStuffByTimeout', () => {
   beforeAll(() => {
@@ -59,9 +81,22 @@ describe('doStuffByInterval', () => {
   });
 });
 
+jest.mock('fs');
+jest.mock('fs/promises', () => {
+  const originalModule = jest.requireActual<typeof fs>('fs/promises');
+  return {
+    ...originalModule,
+    readFile: (): Promise<string> => {
+      return new Promise((resolve) => {
+        resolve(generateRandomString(50));
+      });
+    },
+  };
+});
+
 describe('readFileAsynchronously', () => {
   test('should call join with pathToFile', async () => {
-    const filePath = './index.ts';
+    const filePath = generateRandomPath();
     const spyFunc = jest.spyOn(path, 'join');
     await readFileAsynchronously(filePath);
     expect(spyFunc).toHaveBeenCalledWith(expect.anything(), filePath);
@@ -69,12 +104,14 @@ describe('readFileAsynchronously', () => {
   });
 
   test('should return null if file does not exist', async () => {
-    const filePath = Math.random().toString();
-    expect(await readFileAsynchronously(filePath)).toBeNull();
+    (fs.existsSync as jest.Mock).mockReturnValue(false);
+    const result = await readFileAsynchronously(generateRandomPath());
+    expect(result).toBeNull();
   });
 
   test('should return file content if file exists', async () => {
-    const filePath = './index.ts';
-    expect(typeof (await readFileAsynchronously(filePath))).toBe('string');
+    (fs.existsSync as jest.Mock).mockReturnValue(true);
+    const data = await readFileAsynchronously(generateRandomPath());
+    expect(typeof data).toBe('string');
   });
 });
