@@ -4,8 +4,7 @@ import path from 'path';
 
 const generateRandomString = (length = 10) => {
   let resultString = '';
-  const characters =
-    '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const characters = 'abcdefghijklmnopqrstuvwxyz';
   for (let i = 1; i <= length; i++) {
     resultString += characters.charAt(
       Math.floor(Math.random() * characters.length),
